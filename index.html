@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gran Rifa Embrujada</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stars"></div>
+
+<nav class="topbar">
+  <a class="topbar-brand" href="index.html">🎃 Rifa Embrujada</a>
+  <div class="topbar-nav">
+    <a href="index.html" class="current">Inicio</a>
+    <a href="numeros.html">Números</a>
+    <a href="registro.html">Registrar</a>
+    <a href="control.html">Control</a>
+    <a href="resultado.html">Resultado</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-tag">🕯️ Sorteo oficial 2026</span>
+      <h1>RIFA<span>EMBRUJADA</span></h1>
+      <div class="slogan">Deje que la suerte lo asuste</div>
+      <div class="hero-pills">
+        <span>🎫 Valor $100.000</span>
+        <span>📅 Juega 31 octubre</span>
+        <span>🎱 Últimas 2 cifras</span>
+      </div>
+    </div>
+    <img class="hero-castle" src="castillo.png" alt="Castillo embrujado">
+    <img class="hero-moon" src="luna.png" alt="Luna">
+    <img class="hero-bats" src="murcielagos.png" alt="Murciélagos">
+    <img class="hero-pumpkin" src="calabaza.png" alt="Calabaza">
+  </section>
+
+  <section class="public-card info-card">
+    <div class="section-title">
+      <span>🎃</span>
+      <div>
+        <h2>Información del sorteo</h2>
+        <p>Apoyo para semestre universitario y arreglo de moto</p>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-purple" onclick="openModal('modalInfo')">Ver información completa</button>
+    </div>
+  </section>
+
+  <section class="public-card countdown-card">
+    <div class="countdown-copy">
+      <h2>Faltan para el sorteo</h2>
+      <p>31 de octubre · Lotería de Boyacá</p>
+    </div>
+    <div class="countdown">
+      <div class="cd"><b id="cd-dias">--</b><span>Días</span></div>
+      <div class="cd"><b id="cd-horas">--</b><span>Horas</span></div>
+      <div class="cd"><b id="cd-min">--</b><span>Min</span></div>
+      <div class="cd"><b id="cd-seg">--</b><span>Seg</span></div>
+    </div>
+  </section>
+
+  <section class="public-card progress-card">
+    <div class="progress-top">
+      <div>
+        <h2>Progreso de ventas</h2>
+        <p id="progressText">0 de 100 números vendidos</p>
+      </div>
+      <strong id="progressPercent">0%</strong>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <p class="progress-money" id="progressMoney">$0 recaudados de $10.000.000</p>
+    <div class="stats-grid">
+      <div class="stat-card stat-sold"><span>🎟️</span><b id="stat-sold">0</b><small>Vendidos</small></div>
+      <div class="stat-card stat-reserved"><span>🕯️</span><b id="stat-reserved">0</b><small>Apartados</small></div>
+      <div class="stat-card stat-free"><span>🟢</span><b id="stat-free">100</b><small>Disponibles</small></div>
+      <div class="stat-card stat-money"><span>💰</span><b id="stat-revenue">$0</b><small>Recaudo real</small></div>
+    </div>
+  </section>
+
+  <section class="winner-card">
+    <div class="winner-head"><span>🏆 Resultado oficial</span></div>
+    <p id="miniWinner">Cargando...</p>
+    <a class="btn btn-orange btn-wide" href="resultado.html">Ver / verificar resultado</a>
+  </section>
+
+  <section class="public-card" style="padding:24px;text-align:center;">
+    <h2 style="color:var(--purple);">¿Quieres tu número?</h2>
+    <p style="color:#5c4c48;font-size:.82rem;margin-top:6px;">Elige, regístrate o revisa tu boleta</p>
+    <div class="btns" style="justify-content:center;margin-top:16px;">
+      <a class="btn btn-green" href="numeros.html">🔢 Ver números disponibles</a>
+      <a class="btn btn-purple" href="registro.html">➕ Registrar número</a>
+      <a class="btn btn-dark" href="control.html">📋 Control de registros</a>
+    </div>
+  </section>
+
+  <section class="tech-section">
+    <h2>Proyecto final de desarrollo web</h2>
+    <div class="tech-list">
+      <span>HTML5</span><span>CSS3</span><span>JavaScript</span><span>LocalStorage</span><span>html2canvas</span>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>Gran Rifa Embrujada 2026</p>
+  <p>Apoyo para semestre universitario y arreglo de moto</p>
+</footer>
+
+<div class="overlay" id="modalInfo">
+  <div class="modal">
+    <button class="close" onclick="closeModal('modalInfo')">✕</button>
+    <h2>Información del sorteo</h2>
+    <p class="modal-note">Apoyo para semestre universitario y arreglo de moto</p>
+    <div class="info-grid">
+      <div class="info-box"><span>🎫</span><small>VALOR</small><b>$100.000</b></div>
+      <div class="info-box"><span>📅</span><small>JUEGA</small><b>31 OCTUBRE</b></div>
+      <div class="info-box"><span>🎱</span><small>MODALIDAD</small><b>ÚLTIMAS 2 CIFRAS</b></div>
+    </div>
+    <p class="modal-note" style="margin-top:14px;">Se juega el 31 de octubre con la Lotería de Boyacá. El premio es de $5.000.000 en efectivo.</p>
+  </div>
+</div>
+
+<div class="toast-box" id="toastContainer"></div>
+<script src="common.js"></script>
+<script>
+  startCountdown();
+  renderPublicStats();
+  renderWinnerBanner();
+</script>
+</body>
+</html>

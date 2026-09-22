@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultado oficial — Rifa Embrujada</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stars"></div>
+
+<nav class="topbar">
+  <a class="topbar-brand" href="index.html">🎃 Rifa Embrujada</a>
+  <div class="topbar-nav">
+    <a href="index.html">Inicio</a>
+    <a href="numeros.html">Números</a>
+    <a href="registro.html">Registrar</a>
+    <a href="control.html">Control</a>
+    <a href="resultado.html" class="current">Resultado</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero-mini">
+    <img src="castillo.png" alt="Castillo">
+    <div class="hero-mini-text">
+      <h2>Rifa Embrujada</h2>
+      <p>Resultado oficial del sorteo</p>
+    </div>
+    <div class="hero-mini-slogan">Deje que la suerte lo asuste</div>
+  </section>
+
+  <section class="winner-card">
+    <div class="winner-head">
+      <span>🏆 Resultado oficial</span>
+      <small style="display:block;margin-top:4px;color:#ddcde7;">Dos últimas cifras — Lotería de Boyacá</small>
+    </div>
+    <div class="winner-number" id="winnerNumber">--</div>
+    <div class="winner-name" id="winnerName"></div>
+    <p class="winner-detail" id="winnerDetail">Aún no se ha verificado el resultado.</p>
+
+    <div class="winner-admin" id="adminBlock">
+      <p style="margin-top:10px;">Ingresa las dos últimas cifras oficiales para verificar el ganador:</p>
+      <div class="winner-controls">
+        <input type="text" id="resultInput" maxlength="2" placeholder="Ej: 23">
+        <button class="btn btn-orange" onclick="verifyResult()">Verificar</button>
+      </div>
+    </div>
+
+    <div id="lockedBlock" style="display:none;margin-top:14px;">
+      <button class="btn btn-dark btn-small" onclick="unlockResult()">✏️ Corregir resultado</button>
+    </div>
+  </section>
+
+  <a class="back-btn" href="index.html">← Volver a inicio</a>
+</div>
+
+<div class="toast-box" id="toastContainer"></div>
+<script src="common.js"></script>
+<script>
+function render() {
+  const winnerData = loadWinner();
+  const numberEl = document.getElementById("winnerNumber");
+  const nameEl = document.getElementById("winnerName");
+  const detailEl = document.getElementById("winnerDetail");
+  const adminBlock = document.getElementById("adminBlock");
+  const lockedBlock = document.getElementById("lockedBlock");
+
+  if (winnerData && winnerData.locked) {
+    numberEl.textContent = winnerData.number;
+    numberEl.classList.add("confirmed");
+    if (winnerData.name) {
+      nameEl.textContent = winnerData.name;
+      nameEl.classList.add("show");
+      detailEl.textContent = "¡Resultado verificado! Felicidades al ganador.";
+    } else {
+      nameEl.classList.remove("show");
+      detailEl.textContent = "Resultado verificado. Ese número no tiene comprador registrado.";
+    }
+    adminBlock.style.display = "none";
+    lockedBlock.style.display = "block";
+  } else {
+    numberEl.textContent = "--";
+    numberEl.classList.remove("confirmed");
+    nameEl.classList.remove("show");
+    detailEl.textContent = "Aún no se ha verificado el resultado.";
+    adminBlock.style.display = "block";
+    lockedBlock.style.display = "none";
+  }
+}
+
+function verifyResult() {
+  const input = document.getElementById("resultInput");
+  const num = parseNumberInput(input.value);
+  if (!num) { toast("Escribe las dos cifras del resultado (00 a 99).", "error"); return; }
+
+  const records = loadRecords();
+  const winnerRecord = records.find(r => r.num === num);
+
+  if (winnerRecord) {
+    winnerRecord.status = "ganador";
+    saveRecords(records);
+  }
+
+  saveWinner({ number: num, name: winnerRecord ? winnerRecord.name : "", locked: true });
+  toast(`Resultado ${num} guardado y bloqueado.`, "success");
+  render();
+}
+
+function unlockResult() {
+  if (!confirm("¿Corregir el resultado oficial? Esto vuelve a habilitar la verificación.")) return;
+  const winnerData = loadWinner();
+  if (winnerData) {
+    winnerData.locked = false;
+    saveWinner(winnerData);
+  }
+  document.getElementById("resultInput").value = winnerData ? winnerData.number : "";
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

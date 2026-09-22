@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Números disponibles — Rifa Embrujada</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stars"></div>
+
+<nav class="topbar">
+  <a class="topbar-brand" href="index.html">🎃 Rifa Embrujada</a>
+  <div class="topbar-nav">
+    <a href="index.html">Inicio</a>
+    <a href="numeros.html" class="current">Números</a>
+    <a href="registro.html">Registrar</a>
+    <a href="control.html">Control</a>
+    <a href="resultado.html">Resultado</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero-mini">
+    <img src="castillo.png" alt="Castillo">
+    <div class="hero-mini-text">
+      <h2>Rifa Embrujada</h2>
+      <p>Números disponibles del sorteo</p>
+    </div>
+    <div class="hero-mini-slogan">Deje que la suerte lo asuste</div>
+  </section>
+
+  <section class="public-card numbers-card">
+    <div class="section-title">
+      <span>🔢</span>
+      <div>
+        <h2>Números disponibles</h2>
+        <p>Haz clic en un número libre para registrarlo al instante.</p>
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--green);"></span>Disponible</span>
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--orange);"></span>Vendido</span>
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--purple);"></span>Apartado</span>
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--gold);"></span>Ganador</span>
+    </div>
+
+    <div class="numbers-grid" id="numbersGrid"></div>
+  </section>
+
+  <a class="back-btn" href="index.html">← Volver a inicio</a>
+</div>
+
+<script src="common.js"></script>
+<script>
+function renderGrid() {
+  const records = loadRecords();
+  const statusMap = {};
+  records.forEach(r => { statusMap[r.num] = r.status; });
+
+  const grid = document.getElementById("numbersGrid");
+  grid.innerHTML = "";
+
+  for (let i = 0; i < CONFIG.totalNumeros; i++) {
+    const num = String(i).padStart(2, "0");
+    const status = statusMap[num];
+
+    if (!status) {
+      const cell = document.createElement("a");
+      cell.href = `registro.html?num=${num}`;
+      cell.className = "num-cell num-free";
+      cell.textContent = num;
+      cell.title = "Disponible — clic para registrar";
+      grid.appendChild(cell);
+    } else {
+      const cell = document.createElement("div");
+      cell.className = "num-cell num-" + status;
+      cell.textContent = num;
+      cell.title = getStatusLabel(status);
+      grid.appendChild(cell);
+    }
+  }
+}
+renderGrid();
+</script>
+</body>
+</html>

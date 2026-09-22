@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de registros — Rifa Embrujada</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stars"></div>
+
+<nav class="topbar">
+  <a class="topbar-brand" href="index.html">🎃 Rifa Embrujada</a>
+  <div class="topbar-nav">
+    <a href="index.html">Inicio</a>
+    <a href="numeros.html">Números</a>
+    <a href="registro.html">Registrar</a>
+    <a href="control.html" class="current">Control</a>
+    <a href="resultado.html">Resultado</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero-mini">
+    <img src="castillo.png" alt="Castillo">
+    <div class="hero-mini-text">
+      <h2>Rifa Embrujada</h2>
+      <p>Control de registros</p>
+    </div>
+    <div class="hero-mini-slogan">Deje que la suerte lo asuste</div>
+  </section>
+
+  <section class="public-card" style="padding:22px;">
+    <div class="records-top">
+      <div>
+        <h2 style="color:var(--purple);">📋 Control de registros</h2>
+        <p id="recordsSummary">0 registros en total</p>
+      </div>
+      <a class="btn btn-purple btn-small" href="registro.html">➕ Nuevo registro</a>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="todos">Todos</button>
+      <button class="filter-btn" data-filter="vendido">Vendidos</button>
+      <button class="filter-btn" data-filter="apartado">Apartados</button>
+      <button class="filter-btn" data-filter="ganador">Ganador</button>
+    </div>
+
+    <div class="table-tools">
+      <input type="text" id="searchBox" placeholder="Buscar por número, nombre o celular...">
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>N°</th><th>Comprador</th><th>Celular</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <a class="back-btn" href="index.html">← Volver a inicio</a>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="overlay" id="modalEdit">
+  <div class="modal">
+    <button class="close" onclick="closeModal('modalEdit')">✕</button>
+    <h2>Editar registro</h2>
+    <p class="modal-note">Número <b id="editNumLabel"></b></p>
+    <div class="edit-grid">
+      <div><label>Nombre</label><input type="text" id="editName"></div>
+      <div><label>Celular</label><input type="text" id="editPhone"></div>
+      <div>
+        <label>Estado</label>
+        <select id="editStatus">
+          <option value="vendido">Vendido</option>
+          <option value="apartado">Apartado</option>
+        </select>
+      </div>
+    </div>
+    <div class="btns" style="margin-top:16px;">
+      <button class="btn btn-dark" onclick="closeModal('modalEdit')">Cancelar</button>
+      <button class="btn btn-purple" onclick="saveEdit()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BOLETA -->
+<div class="overlay" id="modalTicket">
+  <div class="modal modal-ticket">
+    <button class="close" onclick="closeModal('modalTicket')">✕</button>
+    <div class="rifa-container" id="ticketCapture">
+      <img class="rifa-imagen" src="rifa.png" alt="Boleta de la rifa">
+      <div class="numero-rifa" id="ticketNumero"></div>
+      <div class="nombre-rifa" id="ticketNombre"></div>
+    </div>
+    <div class="ticket-owner">
+      <strong id="ticketFullName"></strong>
+      <span id="ticketPhoneLabel"></span>
+    </div>
+    <div class="btns" style="justify-content:center;margin-top:14px;">
+      <button class="btn btn-green" onclick="sendTicketWA()">💬 WhatsApp</button>
+      <button class="btn btn-orange" onclick="downloadTicketImage()">🖼️ Imagen PNG</button>
+      <button class="btn btn-dark" onclick="closeModal('modalTicket')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-box" id="toastContainer"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="common.js"></script>
+<script>
+let currentFilter = "todos";
+let editTarget = null;
+let ticketTarget = null;
+
+function getFilteredRecords() {
+  const query = document.getElementById("searchBox").value.toLowerCase().trim();
+  return loadRecords().filter(r => {
+    const matchesFilter = currentFilter === "todos" || r.status === currentFilter;
+    const matchesQuery = r.num.includes(query) || r.name.toLowerCase().includes(query) || r.phone.includes(query);
+    return matchesFilter && matchesQuery;
+  });
+}
+
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const filtered = getFilteredRecords();
+  const all = loadRecords();
+  document.getElementById("recordsSummary").textContent = `${all.length} registro${all.length === 1 ? "" : "s"} en total`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#8a7268;padding:20px;">Sin registros para este filtro.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td><span class="badge">${escapeHtml(r.num)}</span></td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.phone)}</td>
+      <td><span class="status st-${r.status}">${getStatusLabel(r.status)}</span></td>
+      <td>${formatDate(r.createdAt)}</td>
+      <td class="action">
+        <button class="mini mini-edit" onclick="openEdit('${r.num}')" title="Editar">✏️</button>
+        <button class="mini mini-ticket" onclick="openTicket('${r.num}')" title="Boleta">🎫</button>
+        <button class="mini mini-del" onclick="deleteRecord('${r.num}')" title="Eliminar">🗑️</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
+    renderTable();
+  });
+});
+document.getElementById("searchBox").addEventListener("input", renderTable);
+
+function openEdit(num) {
+  const records = loadRecords();
+  editTarget = records.find(r => r.num === num);
+  if (!editTarget) return;
+  document.getElementById("editNumLabel").textContent = editTarget.num;
+  document.getElementById("editName").value = editTarget.name;
+  document.getElementById("editPhone").value = editTarget.phone;
+  document.getElementById("editStatus").value = editTarget.status === "ganador" ? "vendido" : editTarget.status;
+  openModal("modalEdit");
+}
+function saveEdit() {
+  if (!editTarget) return;
+  const name = document.getElementById("editName").value.trim();
+  const phone = document.getElementById("editPhone").value.trim();
+  if (!name) { toast("El nombre no puede quedar vacío.", "error"); return; }
+  if (!isValidPhone(phone)) { toast("Celular inválido.", "error"); return; }
+
+  const records = loadRecords();
+  const record = records.find(r => r.num === editTarget.num);
+  record.name = name;
+  record.phone = phone.replace(/\D/g, "");
+  record.status = document.getElementById("editStatus").value;
+  saveRecords(records);
+  toast("Registro actualizado.", "success");
+  closeModal("modalEdit");
+  renderTable();
+}
+function deleteRecord(num) {
+  if (!confirm(`¿Eliminar el registro del número ${num}?`)) return;
+  const records = loadRecords().filter(r => r.num !== num);
+  saveRecords(records);
+  toast(`Número ${num} eliminado.`, "warn");
+  renderTable();
+}
+
+function openTicket(num) {
+  const records = loadRecords();
+  ticketTarget = records.find(r => r.num === num);
+  if (!ticketTarget) return;
+  document.getElementById("ticketNumero").textContent = ticketTarget.num;
+  document.getElementById("ticketNombre").textContent = getShortName(ticketTarget.name);
+  document.getElementById("ticketFullName").textContent = ticketTarget.name;
+  document.getElementById("ticketPhoneLabel").textContent = ticketTarget.phone;
+  openModal("modalTicket");
+}
+function downloadTicketImage() {
+  if (!ticketTarget) return;
+  const node = document.getElementById("ticketCapture");
+  html2canvas(node, { scale: 2, useCORS: true }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `boleta_${ticketTarget.num}_${safeFileName(ticketTarget.name)}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+function sendTicketWA() {
+  if (!ticketTarget) return;
+  const record = ticketTarget;
+  const phone = record.phone.replace(/\D/g, "");
+  const message = [
+    `*${CONFIG.titulo}*`,
+    "",
+    `Número: *${record.num}*`,
+    `Comprador: ${record.name}`,
+    `Valor: ${formatMoney(CONFIG.valor)}`,
+    `Premio: ${formatMoney(CONFIG.premio)}`,
+    "Sorteo: 31 de octubre de 2026",
+    "Modalidad: dos últimas cifras de la Lotería de Boyacá",
+    "",
+    "¡Deje que la suerte lo asuste!"
+  ].join("\n");
+  window.open(`https://wa.me/57${phone}?text=${encodeURIComponent(message)}`, "_blank");
+}
+
+renderTable();
+</script>
+</body>
+</html>
