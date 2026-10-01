@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Números disponibles — Rifa Embrujada</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stars"></div>
+
+<nav class="topbar">
+  <a class="topbar-brand" href="index.html">🎃 Rifa Embrujada</a>
+  <div class="topbar-nav">
+    <a href="index.html">Inicio</a>
+    <a href="numeros.html" class="current">Números</a>
+    <a href="registro.html">Registrar</a>
+    <a href="control.html">Control</a>
+    <a href="resultado.html">Resultado</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero-mini">
+    <img src="castillo.png" alt="Castillo">
+    <div class="hero-mini-text">
+      <h2>Rifa Embrujada</h2>
+      <p>Números disponibles del sorteo</p>
+    </div>
+    <div class="hero-mini-slogan">Deje que la suerte lo asuste</div>
+  </section>
+
+  <section class="public-card numbers-card" id="numbersCapture">
+    <div class="section-title">
+      <span>🔢</span>
+      <div>
+        <h2>Números disponibles</h2>
+        <p id="availableSummary">Haz clic en un número libre para registrarlo al instante.</p>
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--green);"></span>Disponible</span>
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--orange);"></span>Vendido</span>
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--purple);"></span>Apartado</span>
+      <span class="legend-chip"><span class="legend-dot" style="background:var(--gold);"></span>Ganador</span>
+    </div>
+
+    <div class="numbers-grid" id="numbersGrid"></div>
+  </section>
+
+  <!-- COMPARTIR DISPONIBLES -->
+  <div class="btns" style="justify-content:center;margin-top:16px;">
+    <button class="btn btn-green" onclick="sendAvailableNumbersWA()">💬 Enviar por WhatsApp</button>
+    <button class="btn btn-orange" onclick="downloadNumbersImage()">🖼️ Imagen PNG</button>
+    <button class="btn btn-dark" onclick="downloadAvailableNumbers()">📄 Archivo TXT</button>
+  </div>
+
+  <a class="back-btn" href="index.html">← Volver a inicio</a>
+</div>
+
+<div class="toast-box" id="toastContainer"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="common.js"></script>
+<script>
+function renderGrid() {
+  const records = loadRecords();
+  const statusMap = {};
+  records.forEach(r => { statusMap[r.num] = r.status; });
+
+  const grid = document.getElementById("numbersGrid");
+  grid.innerHTML = "";
+
+  for (let i = 0; i < CONFIG.totalNumeros; i++) {
+    const num = String(i).padStart(2, "0");
+    const status = statusMap[num];
+
+    if (!status) {
+      const cell = document.createElement("a");
+      cell.href = `registro.html?num=${num}`;
+      cell.className = "num-cell num-free";
+      cell.textContent = num;
+      cell.title = "Disponible — clic para registrar";
+      grid.appendChild(cell);
+    } else {
+      const cell = document.createElement("div");
+      cell.className = "num-cell num-" + status;
+      cell.textContent = num;
+      cell.title = getStatusLabel(status);
+      grid.appendChild(cell);
+    }
+  }
+
+  const free = CONFIG.totalNumeros - records.length;
+  document.getElementById("availableSummary").textContent =
+    `${free} de ${CONFIG.totalNumeros} números libres. Haz clic en uno para registrarlo.`;
+}
+
+/* Imagen PNG de la cuadrícula para compartir */
+function downloadNumbersImage() {
+  const node = document.getElementById("numbersCapture");
+  toast("Generando imagen PNG...", "warn");
+  html2canvas(node, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#120019" })
+    .then(canvas => {
+      const link = document.createElement("a");
+      link.download = "numeros_disponibles.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast("Imagen PNG descargada.", "success");
+    })
+    .catch(err => {
+      console.error(err);
+      toast("No fue posible generar la imagen. Prueba con Live Server.", "error");
+    });
+}
+
+renderGrid();
+</script>
+</body>
+</html>
